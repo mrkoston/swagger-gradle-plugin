@@ -57,5 +57,6 @@ swagger {
             }
         }
         swaggerDirectory = "${project.buildDir}/swagger-ui"
+        attachSwaggerArtifact = true
     }
 }
