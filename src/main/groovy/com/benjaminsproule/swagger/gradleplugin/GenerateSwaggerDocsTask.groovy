@@ -86,25 +86,32 @@ class GenerateSwaggerDocsTask extends DefaultTask {
             documentSource.toDocuments()
         }
 
+        def swaggerFileName = swaggerPluginExtension.getSwaggerFileName()
         documentSource.toSwaggerDocuments(
             swaggerPluginExtension.getSwaggerUIDocBasePath() == null
                 ? swaggerPluginExtension.getBasePath()
                 : swaggerPluginExtension.getSwaggerUIDocBasePath(),
             swaggerPluginExtension.getOutputFormats(),
-            swaggerPluginExtension.getSwaggerFileName(),
+            swaggerFileName,
             encoding)
 
         if (swaggerPluginExtension.isAttachSwaggerArtifact() && swaggerPluginExtension.getSwaggerDirectory() != null && this.project != null) {
-            String classifierName = new File(swaggerPluginExtension.getSwaggerDirectory()).getName()
-            File swaggerFile = new File(swaggerPluginExtension.getSwaggerDirectory(), 'swagger.json')
+            String outputFormats = swaggerPluginExtension.getOutputFormats()
 
-            project.task('createSwaggerArtifact', type: Jar, dependsOn: project.tasks.classes) {
-                classifier = classifierName
-                from swaggerFile
-            }
+            for (String format : outputFormats.split(',')) {
+                String classifierName = swaggerFileName.equals('swagger') ?
+                    new File(swaggerPluginExtension.getSwaggerDirectory()).name
+                    : swaggerFileName;
+                File swaggerFile = new File(swaggerPluginExtension.getSwaggerDirectory(), swaggerFileName + "." + format.toLowerCase())
 
-            project.artifacts {
-                archives project.tasks.createSwaggerArtifact
+                project.task("createSwaggerArtifact${format}", type: Jar, dependsOn: project.tasks.classes) {
+                    classifier = classifierName
+                    from swaggerFile
+                }
+
+                project.artifacts {
+                    archives project.tasks.getByName("createSwaggerArtifact${format}")
+                }
             }
 
             project.tasks.createSwaggerArtifact.execute()

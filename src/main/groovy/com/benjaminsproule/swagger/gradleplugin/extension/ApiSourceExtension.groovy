@@ -23,6 +23,11 @@ class ApiSourceExtension extends ApiSource {
         return super.getSwaggerFileName() == null || super.getSwaggerFileName().isEmpty() ? "swagger" : super.getSwaggerFileName()
     }
 
+    @Override
+    String getOutputFormats() {
+        return super.getOutputFormats() == null || super.getOutputFormats().isEmpty() ? "json" : super.getOutputFormats()
+    }
+
     ApiSourceExtension(Project project) {
         this.project = project
 
